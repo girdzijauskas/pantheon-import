@@ -38,20 +38,20 @@
 export SITE_ID="$1"
 export SITE_LABEL="$2"
 export DB_FILE_NAME="$3"
-export DIR="/Users/joris/work/3-projects/$1"
+export DIR="$PWD/$1"
 export BACKUP_DIR="$1-backup"
 export CURRENT_DIR=$PWD
 
 
 
-# SE THE SITE UP IN PANTHEON ------------------------------------------------- #
+# SET THE SITE UP IN PANTHEON ------------------------------------------------- #
 
 # Create the site on Pantheon
 terminus site:create $SITE_ID "$SITE_LABEL" empty --org "organization-name" --region eu
 
 echo "Succesfully create a new site"
 
-# Set the owner of the site to web@
+# Set the owner of the site to your org email
 terminus site:team:add $SITE_ID "email-address@of.user"
 terminus owner:set $SITE_ID "email-address@of.user"
 

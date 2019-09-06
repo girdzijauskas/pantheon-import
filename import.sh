@@ -47,13 +47,13 @@ export CURRENT_DIR=$PWD
 # SE THE SITE UP IN PANTHEON ------------------------------------------------- #
 
 # Create the site on Pantheon
-terminus site:create $SITE_ID "$SITE_LABEL" empty --org "ChampionsUKplc" --region eu
+terminus site:create $SITE_ID "$SITE_LABEL" empty --org "organization-name" --region eu
 
 echo "Succesfully create a new site"
 
 # Set the owner of the site to web@
-terminus site:team:add $SITE_ID "web@championsukplc.com"
-terminus owner:set $SITE_ID "web@championsukplc.com"
+terminus site:team:add $SITE_ID "email-address@of.user"
+terminus owner:set $SITE_ID "email-address@of.user"
 
 # ---------------------------------------------------------------------------- #
 

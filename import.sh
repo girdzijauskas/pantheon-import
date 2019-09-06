@@ -32,6 +32,7 @@
 # living. For me, this is User/work/3-projects/. A created project will live in
 # User/work/3-projects/lmba and this script lives in User/work/3-projects/import.sh.
 
+# 7. Replace your organization name and the e-mail address within the script
 
 
 

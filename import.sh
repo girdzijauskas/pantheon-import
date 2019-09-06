@@ -85,6 +85,8 @@ rm -r /.circleci
 
 
 # Run composer update as well as install Drush
+# We also require drupal/core:8.7.6 since 8.7.7 was not fixed at the time. You should
+# change this as needed
 composer require drupal/core:8.7.6
 composer update
 composer install
@@ -100,7 +102,7 @@ terminus connection:set $SITE_ID.dev git
 
 
 # Replace the .gitignore file with the fixed version
-cp /Users/joris/work/3-projects/.gitignore ./
+cp $CURRENT_DIR/.gitignore ./
 
 # ---------------------------------------------------------------------------- #
 
@@ -116,7 +118,7 @@ echo yes | git push --force
 # ---------------------------------------------------------------------------- #
 
 
-# MERGE the cPanel PROJECT IN AND PROCESS IT AS NEEDED ----------------------- #
+# MERGE THE cPanel PROJECT IN AND PROCESS IT AS NEEDED ----------------------- #
 
 cp -R $CURRENT_DIR/$BACKUP_DIR/homedir/public_html/modules $CURRENT_DIR/$SITE_ID/web/
 cp -R $CURRENT_DIR/$BACKUP_DIR/homedir/public_html/themes $CURRENT_DIR/$SITE_ID/web/
@@ -125,7 +127,7 @@ cp -R $CURRENT_DIR/$BACKUP_DIR/homedir/public_html/libraries $CURRENT_DIR/$SITE_
 
 # Composerize the project
 echo yes | composer composerize-drupal
-composer remove drupal/md_slider
+composer remove drupal/md_slider # remove troublesome module which isn't managed by composer
 
 
 # Install all the default projects

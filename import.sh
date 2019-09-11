@@ -26,13 +26,13 @@
 
 # 5. Have both composer and terminus installed and working, as well as made the 
 # authentication between your terminus command line and the Pantheon platform 
-# @see https://pantheon.io/docs/terminus/install
+# @see https://pantheon.io/docs/terminus/install 
 
-# 6. This script, .gitignore and composer-edits.php in the parent folder of where your projects will be
-# living. For me, this is User/work/3-projects/. A created project will live in
-# User/work/3-projects/lmba and this script lives in User/work/3-projects/import.sh.
+# 6. This script, .gitignore and composer-edits.php in the parent folder of where your projects will be 
+# living. For me, this is User/work/3-projects/. A created project will live in 
+# User/work/3-projects/lmba and this script lives in User/work/3-projects/import.sh. 
 
-# 7. Replace your organization name and the e-mail address within the script
+# 7. Replace your organization name and the e-mail address within the script 
 
 
 
@@ -45,7 +45,7 @@ export CURRENT_DIR=$PWD
 
 
 
-# SET THE SITE UP IN PANTHEON ------------------------------------------------- #
+# SET THE SITE UP IN PANTHEON ------------------------------------------------ #
 
 # Create the site on Pantheon
 terminus site:create $SITE_ID "$SITE_LABEL" empty --org "organization-name" --region eu
@@ -131,8 +131,9 @@ echo yes | composer composerize-drupal
 composer remove drupal/md_slider # remove troublesome module which isn't managed by composer
 
 
-# Install all the default projects
+# Install all the default projects - sendgrid integration, HSTS
 composer require drupal/sendgrid_integration
+composer require drupal/hsts
 composer require drush/drush
 
 
@@ -151,11 +152,6 @@ git push
 
 # Need to sync the files and the database to the server
 
-# This takes a while, but IT WORKS!
-cd $CURRENT_DIR/$BACKUP_DIR/homedir/public_html/sites/default/files
-terminus rsync . $SITE_ID.dev:files
-
-
 # The database needs to be prepared
 
 export DB_FILE_LOCATION=$CURRENT_DIR/$BACKUP_DIR/mysql/$DB_FILE_NAME
@@ -163,6 +159,30 @@ export PANTHEON_MYSQL_CONNECTION_COMMAND="$(terminus connection:info $SITE_ID.de
 
 eval $PANTHEON_MYSQL_CONNECTION_COMMAND < "$DB_FILE_LOCATION" --verbose
 
-# ---------------------------------------------------------------------------- #
+# Update the database schema and enable modules
+terminus drush $SITE_ID.dev updb
+terminus drush $SITE_ID.dev en hsts
+terminus drush $SITE_ID.dev en sendgrid_integration
 
-# What else needs to be done beyond this point? Anything else that can be automated?
+
+# Do some work before syncing files since we need time for the code to sync to dev
+
+# Set the site into sftp mode so that we may export the configuration
+terminus connection:set $SITE_ID.dev sftp
+
+# Export full site config
+terminus drush $SITE_ID.dev cex
+
+
+# This takes a while, but IT WORKS! We need to do this in between drush cex.
+cd $CURRENT_DIR/$BACKUP_DIR/homedir/public_html/sites/default/files
+terminus rsync . $SITE_ID.dev:files
+
+
+# We need to give the site some time to sync the code, cannot commit immediately
+terminus env:commit $SITE_ID.dev --message="Exported full config"
+
+# Set the site back into git connection mode
+terminus connection:set $SITE_ID.dev git
+
+# ---------------------------------------------------------------------------- #
